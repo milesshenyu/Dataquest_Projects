@@ -80,5 +80,3 @@ vectors <- list(vector_cols, countries)
 data_structure_list <- list("dataframe" = datasets, "matrix" = matrices, "vector" = vectors)
 
 covid_analysis_list <- list(question, answer, data_structure_list)
-
-covid_analysis_list[[2]]
