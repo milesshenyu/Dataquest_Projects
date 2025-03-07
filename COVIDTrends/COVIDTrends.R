@@ -1,4 +1,5 @@
 library(tidyverse)
+library(ggplot2)
 
 covid_df <- read_csv("COVIDTrends/covid19.csv")
 
@@ -16,6 +17,16 @@ covid_df_all_states <- covid_df %>%
                        filter(Province_State == "All States") %>% 
                        select(!Province_State)
 
+covid_df_all_states_cumulative <- covid_df_all_states %>%
+                                  select(Date,
+                                         Continent_Name,
+                                         Two_Letter_Country_Code,
+                                         positive,
+                                         hospitalized,
+                                         recovered,
+                                         death,
+                                         total_tested)
+
 covid_df_all_states_daily <- covid_df_all_states %>% 
                              select(Date,
                                     Country_Region,
@@ -24,14 +35,27 @@ covid_df_all_states_daily <- covid_df_all_states %>%
                                     daily_tested,
                                     daily_positive)
 
+covid_df_all_states_cumulative_max <- covid_df_all_states_cumulative %>% 
+    group_by(Continent_Name, Two_Letter_Country_Code) %>% 
+    summarize(max_deaths = max(death)) %>% 
+    filter(max_deaths > 0)
+
+covid_df_all_states_cumulative_max
+
+ggplot(covid_df_all_states_cumulative_max,
+       aes(x = Two_Letter_Country_Code,
+           y = max_deaths,
+           color = Continent_Name)) +
+    geom_point()
+
+death_top_3 <- c("US", "IT", "GB")
+
 covid_df_all_states_daily_sum <- covid_df_all_states_daily %>% 
     group_by(Country_Region) %>% 
-    summarize(
-        tested = sum(daily_tested),
-        positive = sum(daily_positive),
-        active = sum(active),
-        hospitalized = sum (hospitalizedCurr)
-    ) %>% 
+    summarize(tested = sum(daily_tested),
+              positive = sum(daily_positive),
+              active = sum(active),
+              hospitalized = sum (hospitalizedCurr)) %>% 
     arrange(desc(tested))
 
 covid_df_all_states_daily_sum
