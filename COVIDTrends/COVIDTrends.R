@@ -81,26 +81,65 @@ united_kingdom <- c(0.11, 1473672, 166909, 0, 0)
 united_states <- c(0.10, 17282363, 1877179, 0, 0)
 turkey <- c(0.08, 2031192, 163941, 2980960, 0)
 
-covid_mat <- rbind(united_kingdom, united_states, turkey)
+covid_mat <- cbind(tested_cases, positive_cases, active_cases, hospitalized_cases)
 
-colnames(covid_mat) <- c("Ratio", "tested", "positive", "active", "hospitalized")
+population <- c(331002651, 145934462, 60461826, 1380004385, 84339067, 37742154, 67886011, 25499884, 32971854, 37846611)
+
+covid_mat <- covid_mat * 100 / population
 
 covid_mat
 
-question <- "Which countries have had the highest number of positive cases against the number of tests?"
+tested_cases_rank <- rank(covid_mat[,"tested_cases"])
+positive_cases_rank <- rank(covid_mat[,"positive_cases"])
+active_cases_rank <- rank(covid_mat[,"active_cases"])
+hospitalized_cases_rank <- rank(covid_mat[,"hospitalized_cases"])
 
-answer <- c("Positive tested cases" = positive_tested_top_3)
+covid_mat_rank <- rbind(tested_cases_rank, 
+                        positive_cases_rank, 
+                        active_cases_rank, 
+                        hospitalized_cases_rank)
 
-datasets <- list(
-    original = covid_df,
-    allstates = covid_df_all_states,
-    daily = covid_df_all_states_daily,
-    top_10 = covid_top_10
+print(covid_mat_rank)
+
+covid_mat_rank_trimmed <- covid_mat_rank[-1, ]
+
+aggregated_rankings <- colSums(covid_mat_rank_trimmed)
+
+aggregated_rankings
+
+best_effort_tested_cases_top_3 <- names(sort(covid_mat_rank["tested_cases_rank", ], decreasing = TRUE)[1:3])
+
+most_affected_country <- names(which.max(aggregated_rankings))
+
+least_affected_country <- names(which.min(aggregated_rankings))
+
+question_list <- list(
+    "Which countries have had the highest number of deaths due to COVID-19?",
+    "Which countries have had the highest number of positive cases against the number of tests?",
+    "Which countries have made the best effort in terms of the number of COVID-19 tests conducted related to their population?",
+    "Which countries were ultimately the most and least affected related to their population?"
 )
 
-matrices <- list(covid_mat)
-vectors <- list(vector_cols, countries)
+answer_list <- list(
+    "Death" = death_top_3,
+    "Positive tested cases" = positive_tested_top_3,
+    "The best effort in test related to the population" = best_effort_tested_cases_top_3,
+    "The most affected country related to its population" = most_affected_country,
+    "The least affected country related to its population" = least_affected_country
+)
 
-data_structure_list <- list("dataframe" = datasets, "matrix" = matrices, "vector" = vectors)
+dataframes_list <- list(covid_df, covid_df_all_states, covid_df_all_states_cumulative, covid_df_all_states_daily)
+matrices_list <- list(covid_mat, covid_mat_rank)
+vectors_list <- list(vector_cols, population, countries)
 
-covid_analysis_list <- list(question, answer, data_structure_list)
+data_structure_list <- list(
+    "Dataframes" = dataframes_list,
+    "Matrices" = matrices_list,
+    "Vectors" = vectors_list
+)
+
+covid_analysis_list <- list(
+    "Questions" = question_list,
+    "Answers" = answer_list,
+    "Data Structures" = data_structure_list
+)
